@@ -75,6 +75,7 @@ if __name__ == "__main__":
   # main loop where we fetch the new results
   print('database has %d entries at start' % (len(db), ))
   num_added_total = 0
+  num_save = 1000  # save to database every 1000 papers
   for i in range(args.start_index, args.max_index, args.results_per_iteration):
 
     print("Results %i - %i" % (i,i+args.results_per_iteration))
@@ -115,6 +116,10 @@ if __name__ == "__main__":
       print('No new papers were added. Assuming no new papers exist. Exiting.')
       break
 
+    if len(db) > num_save:
+        print('Saving database with %d papers to %s' % (len(db), Config.db_path))
+        safe_pickle_dump(db, Config.db_path)
+        num_save = len(db) + 1000
     print('Sleeping for %i seconds' % (args.wait_time , ))
     time.sleep(args.wait_time + random.uniform(0, 3))
 
