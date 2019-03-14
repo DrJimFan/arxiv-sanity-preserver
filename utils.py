@@ -1,32 +1,36 @@
 from contextlib import contextmanager
 
 import os
+import os.path as opa
 import re
 import pickle
 import tempfile
+
+
+ROOT = opa.expanduser('~/Documents/arxiv/')
 
 # global settings
 # -----------------------------------------------------------------------------
 class Config(object):
     # main paper information repo file
-    db_path = 'db.p'
+    db_path = ROOT+'db.p'
     # intermediate processing folders
-    pdf_dir = os.path.join('data', 'pdf')
-    txt_dir = os.path.join('data', 'txt')
-    thumbs_dir = os.path.join('static', 'thumbs')
+    pdf_dir = ROOT+os.path.join('data', 'pdf')
+    txt_dir = ROOT+os.path.join('data', 'txt')
+    thumbs_dir = ROOT+os.path.join('static', 'thumbs')
     # intermediate pickles
-    tfidf_path = 'tfidf.p'
-    meta_path = 'tfidf_meta.p'
-    sim_path = 'sim_dict.p'
-    user_sim_path = 'user_sim.p'
+    tfidf_path = ROOT+'tfidf.p'
+    meta_path = ROOT+'tfidf_meta.p'
+    sim_path = ROOT+'sim_dict.p'
+    user_sim_path = ROOT+'user_sim.p'
     # sql database file
-    db_serve_path = 'db2.p' # an enriched db.p with various preprocessing info
-    database_path = 'as.db'
-    serve_cache_path = 'serve_cache.p'
+    db_serve_path = ROOT+'db2.p' # an enriched db.p with various preprocessing info
+    database_path = ROOT+'as.db'
+    serve_cache_path = ROOT+'serve_cache.p'
     
     beg_for_hosting_money = 1 # do we beg the active users randomly for money? 0 = no.
-    banned_path = 'banned.txt' # for twitter users who are banned
-    tmp_dir = 'tmp'
+    banned_path = ROOT+'banned.txt' # for twitter users who are banned
+    tmp_dir = ROOT+'tmp'
 
 # Context managers for atomic writes courtesy of
 # http://stackoverflow.com/questions/2333872/atomic-writing-to-file-with-python
