@@ -7,7 +7,7 @@ import pickle
 import tempfile
 
 
-ROOT = opa.expanduser('~/Documents/arxiv/')
+ROOT = opa.expanduser('~/vision/arxiv/')
 
 # global settings
 # -----------------------------------------------------------------------------
