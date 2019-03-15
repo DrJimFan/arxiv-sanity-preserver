@@ -6,6 +6,7 @@ requires: sudo apt-get install imagemagick
 import os
 import time
 import shutil
+import sys
 from subprocess import Popen
 
 from utils import Config
@@ -16,7 +17,7 @@ if not shutil.which('convert'): # shutil.which needs Python 3.3+
   sys.exit()
 
 # create if necessary the directories we're using for processing and output
-pdf_dir = os.path.join('data', 'pdf')
+pdf_dir = Config.pdf_dir
 if not os.path.exists(Config.thumbs_dir): os.makedirs(Config.thumbs_dir)
 if not os.path.exists(Config.tmp_dir): os.makedirs(Config.tmp_dir)
 
@@ -60,6 +61,7 @@ for i,p in enumerate(pdf_files):
 
   # spawn async. convert can unfortunately enter an infinite loop, have to handle this.
   # this command will generate 8 independent images thumb-0.png ... thumb-7.png of the thumbnails
+  # might have warning about gray-scale PNG, ignore!
   pp = Popen(['convert', '%s[0-7]' % (pdf_path, ), '-thumbnail', 'x156', os.path.join(Config.tmp_dir, 'thumb.png')])
   t0 = time.time()
   while time.time() - t0 < 20: # give it 15 seconds deadline
@@ -75,7 +77,7 @@ for i,p in enumerate(pdf_files):
 
   if not os.path.isfile(os.path.join(Config.tmp_dir, 'thumb-0.png')):
     # failed to render pdf, replace with missing image
-    missing_thumb_path = os.path.join('static', 'missing.jpg')
+    missing_thumb_path = os.path.join(Config.static_dir, 'missing.jpg')
     os.system('cp %s %s' % (missing_thumb_path, thumb_path))
     print("could not render pdf, creating a missing image placeholder")
   else:
