@@ -7,11 +7,10 @@ import pickle
 import tempfile
 
 
-ROOT = opa.expanduser('~/vision/arxiv/')
-
 # global settings
 # -----------------------------------------------------------------------------
 class Config(object):
+    ROOT = opa.expanduser('~/vision/arxiv/')
     # main paper information repo file
     db_path = ROOT+'db.p'
     # intermediate processing folders

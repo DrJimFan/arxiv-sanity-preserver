@@ -14,7 +14,12 @@ have = set(os.listdir(Config.pdf_dir)) # get list of all pdfs we already have
 numok = 0
 numtot = 0
 db = pickle.load(open(Config.db_path, 'rb'))
-for pid,j in db.items():
+iter = db.items()  # forward download
+# iter_list = list(db.items())
+# iter = iter_list[len(iter_list)//2:]  # download from middle
+# iter = iter_list[len(iter_list)//2:0:-1]  # backward download from middle
+# iter = reversed(iter_list)  # backward download
+for pid, j in iter:
   
   pdfs = [x['href'] for x in j['links'] if x['type'] == 'application/pdf']
   assert len(pdfs) == 1

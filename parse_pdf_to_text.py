@@ -1,4 +1,9 @@
 """
+Use this command in data/txt/ folder to remove bad text files with 0 bytes
+ls -l | grep '0 Mar' | awk '{print $NF}' | xargs rm
+Count number of bad text:
+ls -l | grep '0 Mar' | awk '{print $NF}' | wc -l
+
 Very simple script that simply iterates over all files data/pdf/f.pdf
 and create a file data/txt/f.pdf.txt that contains the raw text, extracted
 using the "pdftotext" command. If a pdf cannot be converted, this

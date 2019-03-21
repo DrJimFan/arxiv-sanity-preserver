@@ -43,6 +43,12 @@ def parse_arxiv_url(url):
   assert len(parts) == 2, 'error parsing url ' + url
   return parts[0], int(parts[1])
 
+
+def save_db(db):
+  print('Saving database with %d papers to %s' % (len(db), Config.db_path))
+  safe_pickle_dump(db, Config.db_path)
+
+
 if __name__ == "__main__":
 
   # parse input arguments
@@ -51,11 +57,11 @@ if __name__ == "__main__":
                       # default='cat:cs.CV+OR+cat:cs.AI+OR+cat:cs.LG+OR+cat:cs.CL+OR+cat:cs.NE+OR+cat:stat.ML',
                       default='cat:cs.CV+OR+cat:cs.LG',
                       help='query used for arxiv API. See http://arxiv.org/help/api/user-manual#detailed_examples')
-  parser.add_argument('--start-index', type=int, default=0, help='0 = most recent API result')
-  parser.add_argument('--max-index', type=int, default=10000, help='upper bound on paper index we will fetch')
-  parser.add_argument('--results-per-iteration', type=int, default=100, help='passed to arxiv API')
-  parser.add_argument('--wait-time', type=float, default=5.0, help='lets be gentle to arxiv API (in number of seconds)')
-  parser.add_argument('--break-on-no-added', type=int, default=1, help='break out early if all returned query papers are already in db? 1=yes, 0=no')
+  parser.add_argument('-s', '--start-index', type=int, default=0, help='0 = most recent API result')
+  parser.add_argument('--max-index', type=int, default=1000, help='upper bound on paper index we will fetch')
+  parser.add_argument('-r', '--results-per-iteration', type=int, default=100, help='passed to arxiv API')
+  parser.add_argument('-w', '--wait-time', type=float, default=5.0, help='lets be gentle to arxiv API (in number of seconds)')
+  parser.add_argument('--break-on-no-added', type=int, default=0, help='break out early if all returned query papers are already in db? 1=yes, 0=no')
   args = parser.parse_args()
 
   # misc hardcoded variables
@@ -76,12 +82,16 @@ if __name__ == "__main__":
   print('database has %d entries at start' % (len(db), ))
   num_added_total = 0
   num_save = 1000  # save to database every 1000 papers
-  for i in range(args.start_index, args.max_index, args.results_per_iteration):
-
-    print("Results %i - %i" % (i,i+args.results_per_iteration))
+  i = args.start_index - args.results_per_iteration
+  last_i = i
+  while i < args.max_index:
+    i += args.results_per_iteration
     query = 'search_query=%s&sortBy=lastUpdatedDate&start=%i&max_results=%i' % (args.search_query,
                                                          i, args.results_per_iteration)
-    with urllib.request.urlopen(base_url+query) as url:
+    query = base_url + query
+    print(query)
+    print("Results %i - %i" % (i,i+args.results_per_iteration))
+    with urllib.request.urlopen(query) as url:
       response = url.read()
     parse = feedparser.parse(response)
     num_added = 0
@@ -108,23 +118,21 @@ if __name__ == "__main__":
     print('Added %d papers, already had %d.' % (num_added, num_skipped))
 
     if len(parse.entries) == 0:
-      print('Received no results from arxiv. Rate limiting? Exiting. Restart later maybe.')
+      print('Received no results from arxiv. Rate limiting? Sleep 30 seconds.')
       print(response)
-      break
+      i = last_i - args.results_per_iteration * random.randint(0, 1)
+      time.sleep(90)
+    else:
+      last_i = i
+      save_db(db)
 
     if num_added == 0 and args.break_on_no_added == 1:
       print('No new papers were added. Assuming no new papers exist. Exiting.')
       break
 
-    if len(db) > num_save:
-        print('Saving database with %d papers to %s' % (len(db), Config.db_path))
-        safe_pickle_dump(db, Config.db_path)
-        num_save = len(db) + 1000
     print('Sleeping for %i seconds' % (args.wait_time , ))
     time.sleep(args.wait_time + random.uniform(0, 3))
 
   # save the database before we quit, if we found anything new
   if num_added_total > 0:
-    print('Saving database with %d papers to %s' % (len(db), Config.db_path))
-    safe_pickle_dump(db, Config.db_path)
-
+    save_db(db)

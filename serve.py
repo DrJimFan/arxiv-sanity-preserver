@@ -25,7 +25,9 @@ if os.path.isfile('secret_key.txt'):
   SECRET_KEY = open('secret_key.txt', 'r').read()
 else:
   SECRET_KEY = 'devkey, should be in a file'
-app = Flask(__name__)
+
+# root_path allows Flask to start in another dir
+app = Flask(__name__, root_path=Config.ROOT)
 app.config.from_object(__name__)
 limiter = Limiter(app, global_limits=["100 per hour", "20 per minute"])
 

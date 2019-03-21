@@ -12,7 +12,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from utils import Config, safe_pickle_dump
 
 seed(1337)
-max_train = 5000 # max number of tfidf training documents (chosen randomly), for memory efficiency
+max_train = 5000  # max number of tfidf training documents (chosen randomly), for memory efficiency
 max_features = 5000
 
 # read database
@@ -24,7 +24,7 @@ n = 0
 for pid,j in db.items():
   n += 1
   idvv = '%sv%d' % (j['_rawid'], j['_version'])
-  txt_path = os.path.join('data', 'txt', idvv) + '.pdf.txt'
+  txt_path = os.path.join(Config.txt_dir, idvv) + '.pdf.txt'
   if os.path.isfile(txt_path): # some pdfs dont translate to txt
     with open(txt_path, 'r') as f:
       txt = f.read()
